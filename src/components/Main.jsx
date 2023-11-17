@@ -23,6 +23,10 @@ const Main = () => {
     }
   };
 
+  if (!movie || !movie.backdrop_path) {
+    return <div>Loading...</div>; 
+  }
+
   return (
     <div className='w-full h-[600px] text-white'>
       <div className='w-full h-full'>
