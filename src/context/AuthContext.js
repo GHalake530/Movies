@@ -1,49 +1,50 @@
-import {createContext, useContext, useEffect, useState} from 'react';
-import { auth } from '../pages/firebase';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { auth, db } from '../firebase';
 import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged,
-  } from 'firebase/auth';
-  import {setDoc,doc} from 'firebase/firestore'
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import {setDoc,doc} from 'firebase/firestore'
 
+const AuthContext = createContext();
 
-const AuthContext= createContext();
+export function AuthContextProvider({ children }) {
+  const [user, setUser] = useState({});
 
-export function AuthContextProvider({children}) {
-    const [user, setUser] = useState({});
+  function signUp(email, password) {
+    createUserWithEmailAndPassword(auth, email, password);
+    setDoc(doc(db, 'users', email), {
+        savedMovies: []
+    })
+  }
 
-function signUp (email, password) {
-    return createUserWithEmailAndPassword (auth, email, password)
-}
+  function logIn(email, password) {
+    return signInWithEmailAndPassword(auth, email, password);
+  }
 
-function logIn(email, password) {
-    return signInWithEmailAndPassword (auth, email, password)
-}
+  function logOut() {
+    return signOut(auth);
+  }
 
-function logOut() {
-    return signOut(auth)
-}
-
-useEffect(() => {
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log('Current User:', currentUser);
       setUser(currentUser);
     });
-      return () => {
+    return () => {
       unsubscribe();
     };
-  });
+  }, []);
 
-return <AuthContext.Provider value={{signUp, logIn, logOut, user}}>
-    {children} 
+  return (
+    <AuthContext.Provider value={{ signUp, logIn, logOut, user }}>
+      {children}
     </AuthContext.Provider>
+  );
 }
 
-
-
-
-
 export function UserAuth() {
-    return useContext(AuthContext)
+  return useContext(AuthContext);
 }
