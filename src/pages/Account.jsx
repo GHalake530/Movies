@@ -1,3 +1,4 @@
+// Account.jsx
 import React from 'react';
 import SavedShows from '../components/SavedShows';
 
